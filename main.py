@@ -1,3 +1,4 @@
+import heapq
 import os
 import random
 import time
@@ -59,6 +60,65 @@ def find_path_dfs(maze, current, end):
     return False
 
 
+def heuristic(a, b):
+    (x1, y1) = a
+    (x2, y2) = b
+    return abs(x1 - x2) + abs(y1 - y2)
+
+
+def find_path_a_star(maze, start, end):
+    def mark_path(current):
+        if not current:
+            print_maze(maze)
+            time.sleep(0.1)
+            return
+        maze[current[0]][current[1]] = PATH
+        mark_path(parent[current])
+        maze[current[0]][current[1]] = OPEN_SPACE
+
+    heap = []
+    heapq.heappush(heap, (0, start))
+    parent = {start: None}
+    g_score = {start: 0}
+    f_score = {start: heuristic(start, end)}
+    in_heap = {start}
+
+    while heap:
+        current = heapq.heappop(heap)[1]
+        in_heap.remove(current)
+
+        if current == end:
+            while current is not None:
+                maze[current[0]][current[1]] = PATH
+                current = parent[current]
+            print_maze(maze)
+            return True
+
+        row, col = current
+        neighbors = [(row - 1, col), (row + 1, col), (row, col - 1), (row, col + 1)]
+        for neighbor in neighbors:
+            n_row, n_col = neighbor
+            if (
+                0 <= n_row < len(maze)
+                and 0 <= n_col < len(maze[0])
+                and maze[n_row][n_col] != WALL
+            ):
+                tentative_g_score = g_score[current] + 1
+                if neighbor not in g_score or tentative_g_score < g_score[neighbor]:
+                    parent[neighbor] = current
+                    g_score[neighbor] = tentative_g_score
+                    f_score[neighbor] = tentative_g_score + heuristic(neighbor, end)
+                    if neighbor in in_heap:
+                        heap.remove((f_score[neighbor], neighbor))
+                    heapq.heappush(heap, (f_score[neighbor], neighbor))
+                    in_heap.add(neighbor)
+
+                    maze[n_row][n_col] = PATH
+                    mark_path(current)
+                    maze[n_row][n_col] = OPEN_SPACE
+    return False
+
+
 def solver():
     # size = int(input("Enter the size of the maze: "))
     size = 10
@@ -69,12 +129,11 @@ def solver():
 
     while True:
         if option == 1:
-            if find_path_dfs(maze, (0, 0), (size - 1, size - 1)):
+            if find_path_a_star(maze, (0, 0), (size - 1, size - 1)):
                 print("\nPath Found!")
             else:
                 print("\nNo Path Found!")
         elif option == 2:
-            print("Generated Maze: ")
             maze = generate_maze(size, wall_percentage)
             print_maze(maze)
         elif option == 3:
