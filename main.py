@@ -85,33 +85,6 @@ def print_maze(maze):
     maze[0][1], maze[-1][-2] = OPEN_SPACE, OPEN_SPACE
 
 
-def find_path_dfs(maze, current, end):
-    time.sleep(0.1)
-    row, col = current
-    if not (
-        0 <= row < len(maze)
-        and 0 <= col < len(maze[0])
-        and maze[row][col] == OPEN_SPACE
-    ):
-        return False
-    if current == end:
-        maze[row][col] = PATH
-        print_maze(maze)
-        return True
-
-    maze[row][col] = PATH
-    print_maze(maze)
-
-    neighbors = [(row - 1, col), (row + 1, col), (row, col - 1), (row, col + 1)]
-    for neighbor in neighbors:
-        if find_path_dfs(maze, neighbor, end):
-            return True
-
-    maze[row][col] = OPEN_SPACE
-    print_maze(maze)
-    return False
-
-
 def heuristic(a, b):
     (x1, y1) = a
     (x2, y2) = b
