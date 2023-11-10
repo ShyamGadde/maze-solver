@@ -95,7 +95,7 @@ def find_path_a_star(maze, start, end):
     def mark_path(current):
         if not current:
             print_maze(maze)
-            time.sleep(0.1)
+            time.sleep(0.2)
             return
         maze[current[0]][current[1]] = PATH
         mark_path(parent[current])
