@@ -122,8 +122,7 @@ def find_path_a_star(maze, start, end):
 
 
 def solver():
-    # size = int(input("Enter the size of the maze: "))
-    size = 10
+    size = int(input("Enter the size of the maze: "))
     wall_percentage = 25
     maze = None
 
