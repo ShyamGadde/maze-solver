@@ -13,17 +13,67 @@ COLUMN_SEPARATOR = "|"
 COMMAND = "cls" if os.name == "nt" else "clear"
 
 
-def generate_maze(size, wall_percentage):
-    elements = [WALL, OPEN_SPACE]
-    weights = [wall_percentage / 100, 1 - wall_percentage / 100]
-    maze = [random.choices(elements, weights, k=size) for _ in range(size)]
-    maze[0][0], maze[size - 1][size - 1] = OPEN_SPACE, OPEN_SPACE
-    return maze
+def generate_maze(width=20, height=20, complexity=0.75, density=0.75):
+    """
+    Generates a maze using a randomized version of Prim's algorithm.
+
+    Parameters:
+    width (int): The width of the maze. Default is 20.
+    height (int): The height of the maze. Default is 20.
+    complexity (float): A factor for determining the complexity of the maze.
+                        It's used to calculate the number of twists and turns in the maze.
+                        The value should be between 0 and 1. Default is 0.75.
+    density (float): A factor for determining the density of the maze.
+                     It's used to calculate the number of walls in the maze.
+                     The value should be between 0 and 1. Default is 0.75.
+
+    Returns:
+    list: A 2D list representing the maze. Each cell in the maze is represented by
+          an integer, where '1' represents a wall and '0' represents an open space.
+    """
+    # Only odd shapes
+    shape = ((height // 2) * 2 + 1, (width // 2) * 2 + 1)
+    # Adjust complexity and density relative to maze size
+    complexity = int(complexity * (5 * (shape[0] + shape[1])))
+    density = int(density * ((shape[0] // 2) * (shape[1] // 2)))
+    # Build actual maze
+    Z = [[OPEN_SPACE] * shape[1] for _ in range(shape[0])]
+    # Fill borders
+    Z[0], Z[-1] = [WALL] * shape[1], [WALL] * shape[1]
+    for i in range(shape[0]):
+        Z[i][0] = Z[i][-1] = WALL
+    # Make aisles
+    for _ in range(density):
+        x, y = (
+            random.randint(0, shape[1] // 2) * 2,
+            random.randint(0, shape[0] // 2) * 2,
+        )
+        Z[y][x] = WALL
+        for _ in range(complexity):
+            neighbours = []
+            if x > 1:
+                neighbours.append((y, x - 2))
+            if x < shape[1] - 2:
+                neighbours.append((y, x + 2))
+            if y > 1:
+                neighbours.append((y - 2, x))
+            if y < shape[0] - 2:
+                neighbours.append((y + 2, x))
+            if len(neighbours):
+                y_, x_ = neighbours[random.randint(0, len(neighbours) - 1)]
+                if Z[y_][x_] == OPEN_SPACE:
+                    Z[y_][x_] = WALL
+                    Z[y_ + (y - y_) // 2][x_ + (x - x_) // 2] = WALL
+                    x, y = x_, y_
+
+    Z[0][1], Z[-1][-2] = OPEN_SPACE, OPEN_SPACE
+    return Z
 
 
 def print_maze(maze):
     os.system(COMMAND)
-    maze[0][0], maze[len(maze) - 1][len(maze) - 1] = START, END
+
+    maze[0][1], maze[-1][-2] = START, END
 
     print("\n+" + ROW_SEPARATOR * len(maze[0]))
     for row in maze:
@@ -32,7 +82,7 @@ def print_maze(maze):
         )
         print("+" + ROW_SEPARATOR * len(row))
 
-    maze[0][0], maze[len(maze) - 1][len(maze) - 1] = OPEN_SPACE, OPEN_SPACE
+    maze[0][1], maze[-1][-2] = OPEN_SPACE, OPEN_SPACE
 
 
 def find_path_dfs(maze, current, end):
@@ -123,19 +173,18 @@ def find_path_a_star(maze, start, end):
 
 def solver():
     size = int(input("Enter the size of the maze: "))
-    wall_percentage = 25
     maze = None
 
     option = 2
 
     while True:
         if option == 1:
-            if find_path_a_star(maze, (0, 0), (size - 1, size - 1)):
+            if find_path_a_star(maze, (0, 1), (size - 1, size - 2)):
                 print("\nPath Found!")
             else:
                 print("\nNo Path Found!")
         elif option == 2:
-            maze = generate_maze(size, wall_percentage)
+            maze = generate_maze(size, size)
             print_maze(maze)
         elif option == 3:
             print("Exiting...")
