@@ -3,11 +3,11 @@ import os
 import random
 import time
 
-START = "\033[92m S \033[0m"
-END = "\033[92m E \033[0m"
-WALL = "\033[91m ▓ \033[0m"
-OPEN_SPACE = "\033[94m ◌ \033[0m"
-PATH = "\033[92m ◍ \033[0m"
+START = "\033[92mS\033[0m"
+END = "\033[92mE\033[0m"
+WALL = "\033[91m▓\033[0m"
+OPEN_SPACE = "\033[94m◌\033[0m"
+PATH = "\033[92m◍\033[0m"
 ROW_SEPARATOR = "---+"
 COLUMN_SEPARATOR = "|"
 COMMAND = "cls" if os.name == "nt" else "clear"
@@ -27,7 +27,9 @@ def print_maze(maze):
 
     print("\n+" + ROW_SEPARATOR * len(maze[0]))
     for row in maze:
-        print(f"{COLUMN_SEPARATOR}{COLUMN_SEPARATOR.join(row)}{COLUMN_SEPARATOR}")
+        print(
+            f"{COLUMN_SEPARATOR} {f" {COLUMN_SEPARATOR} ".join(row)} {COLUMN_SEPARATOR}"
+        )
         print("+" + ROW_SEPARATOR * len(row))
 
     maze[0][0], maze[len(maze) - 1][len(maze) - 1] = OPEN_SPACE, OPEN_SPACE
