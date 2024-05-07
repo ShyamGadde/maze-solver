@@ -1,4 +1,4 @@
-# Pathfinding Algo Visualizer
+# Maze Solver
 
 Visualization tool for Pathfinding Algorithms
 
